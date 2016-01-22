@@ -11,8 +11,4 @@
 1. To clone the repository from GitHub, run this in a terminal: `git clone git@github.com:ninaolo/labs-DD2390.git`
 2. In Eclipse, import the project by first doing `File -> New -> Java Project`
 3. Deselect "Use default location" and find the cloned repository.
-4. Click "Next" and under "Libraries", do:
-  * Click "Add Library..."
-  * Select JUnit
-  * Change version to JUnit 4 in the dropdown list.
 5. Done!
