@@ -54,6 +54,7 @@ public class ChatClient extends Thread {
 	}
 
 	public static void main(String[] args) {
+		// 127.0.0.1 är den lokala datorn
 		new ChatClient("127.0.0.1", 1337);
 	}
 
