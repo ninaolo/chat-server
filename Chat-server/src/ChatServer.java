@@ -16,20 +16,21 @@ public class ChatServer {
 	private ArrayList<ServerThread> threads;
 
 	public ChatServer() throws IOException {
+		threads = new ArrayList<ServerThread>();
+		startServer();
 		listen();
 	}
 
-	private void listen() throws IOException {
+	private void startServer() throws IOException {
 		System.out.println("Attempting to start server...");
-		try {
-			// Vi börjar lyssna på porten
-			serverSocket = new ServerSocket(port);
-			System.out.println("Successfully started server. Listening on port " + port + ".");
+		serverSocket = new ServerSocket(port);
+		System.out.println("Successfully started server!");
 
-		} catch (Exception e) {
-			e.printStackTrace();
+	}
 
-		}
+	private void listen() throws IOException {
+
+		System.out.println("Listening on port " + port + ".");
 
 		// Vi accepterar connections för evigt
 		while (true) {
@@ -38,10 +39,15 @@ public class ChatServer {
 			// finns någon blockar den.
 			System.out.println("Waiting for client to connect...");
 			Socket clientSocket = serverSocket.accept();
-			System.out.println("Client connected: " + clientSocket);
+			System.out.println("New client connected on port " + clientSocket.getPort() + ".");
 
 			// Skapa en ny tråd för varje ny klient
 			ServerThread thread = new ServerThread(this, clientSocket);
+
+			thread.output
+					.writeUTF("Welcome to the chat " + thread.username + "! There are currently " + (threads.size() + 1)
+							+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.");
+			clientAdded(thread);
 
 			// Lägg till den nya chat-användaren till listan
 			threads.add(thread);
@@ -60,20 +66,39 @@ public class ChatServer {
 
 	}
 
-	// Main: skapa en ny server
-	public static void main(String[] args) throws IOException {
-		new ChatServer();
-	}
-
+	/*
+	 * Används från ServerThread.
+	 */
 	public void removeThread(ServerThread thread) {
+		System.out.println("A user wants to leave the chat room. Processing...");
 		try {
 			thread.clientSocket.close();
 		} catch (IOException e) {
-			System.out.println("Couldn't close thread");
+			System.err.println("Couldn't close thread.");
 			e.printStackTrace();
 		}
 		threads.remove(thread);
-		sendMsgToAll("User has left the chat room");
+		sendMsgToAll("A user has left the chat room.");
+	}
+
+	/*
+	 * Skickar ett meddelande till alla andra när en ny klient ansluter till
+	 * chatten.
+	 */
+	private void clientAdded(ServerThread newThread) {
+		for (ServerThread clientThread : threads) {
+			try {
+				clientThread.output.writeUTF(newThread.username + " joined the chat! There are now "
+						+ (threads.size() + 1) + " users in the chat room.");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// Main: skapa en ny server
+	public static void main(String[] args) throws IOException {
+		new ChatServer();
 	}
 
 }
