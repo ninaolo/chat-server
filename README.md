@@ -1,6 +1,6 @@
 # labs-DD2390
 
-This is a repository for my lab assignments during the spring of 2016 in the course DD2390 at KTH.
+This is a repository for my lab assignments during the spring of 2016 in the course DD2390 (Internet Programming) at KTH.
 
 ## How to run the chat server
 1. Open three terminal windows
