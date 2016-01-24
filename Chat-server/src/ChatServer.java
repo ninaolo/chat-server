@@ -71,14 +71,19 @@ public class ChatServer {
 	 */
 	public void removeThread(ServerThread thread) {
 		System.out.println("A user wants to leave the chat room. Processing...");
+		String tempName = thread.getUsername();
 		try {
 			thread.clientSocket.close();
+			thread.interrupt();
 		} catch (IOException e) {
 			System.err.println("Couldn't close thread.");
 			e.printStackTrace();
 		}
+		thread.interrupt();
 		threads.remove(thread);
-		sendMsgToAll("A user has left the chat room.");
+		sendMsgToAll(tempName+" has left the chatroom");
+		System.out.println("User "+tempName+" has left the chatroom");
+		
 	}
 
 	/*

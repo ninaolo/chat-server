@@ -32,6 +32,10 @@ public class ServerThread extends Thread {
 		// Startar upp tråden genom att kalla på run()
 		start();
 	}
+	
+	public String getUsername(){
+		return username;
+	}
 
 	public void run() {
 
