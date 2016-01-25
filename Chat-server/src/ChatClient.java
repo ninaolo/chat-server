@@ -53,9 +53,10 @@ public class ChatClient {
 			// Väntar på att klienten ska skriva meddelanden i chatten
 			try {
 				String message = clientInput.readLine();
+
 				output.writeUTF(message);
-				if (message.compareTo("leave") == 0){
-					System.out.println("Goodbye "+username);
+				if (message.compareTo("leave") == 0) {
+					System.out.println("Goodbye " + username);
 					System.exit(0);
 				}
 
