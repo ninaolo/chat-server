@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Optional;
 
 // OBS: tänk på synchronized, hur löser vi detta så att man inte tar bort trådar samtidigt som man loopar igenom dem?
 
@@ -65,31 +66,28 @@ public class ChatServer {
 		}
 
 	}
-	
+
 	public void sendPrivateMessage(String user, String message) {
 		for (ServerThread clientThread : threads) {
-			try{
-				if(clientThread.getUsername().compareTo(user)==0){
+			try {
+				if (clientThread.getUsername().compareTo(user) == 0) {
 					clientThread.output.writeUTF(message);
-					}
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
 	}
-	
-	
-	
-	public boolean userExists(String userName){
+
+	public boolean userExists(String userName) {
 		for (ServerThread clientThread : threads) {
-			if(clientThread.getUsername().compareTo(userName)==0){
+			if (clientThread.getUsername().compareTo(userName) == 0) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
 
 	/*
 	 * Används från ServerThread.
@@ -106,9 +104,9 @@ public class ChatServer {
 		}
 		thread.interrupt();
 		threads.remove(thread);
-		sendMsgToAll(tempName+" has left the chatroom");
-		System.out.println("User "+tempName+" has left the chatroom");
-		
+		sendMsgToAll(tempName + " has left the chatroom");
+		System.out.println("User " + tempName + " has left the chatroom");
+
 	}
 
 	/*
@@ -123,6 +121,30 @@ public class ChatServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	/*
+	 * Gets the remote IP corresponding to the given username.
+	 */
+	public String getClientIP(String username) {
+		Optional<ServerThread> user = threads.stream().filter(t -> t.username == username).findFirst();
+		if (user.isPresent()) {
+			return user.get().getIP();
+		} else {
+			return "";
+		}
+	}
+
+	/*
+	 * Gets the remote port corresponding to the given username.
+	 */
+	public int getClientPort(String username) {
+		Optional<ServerThread> user = threads.stream().filter(t -> t.username == username).findFirst();
+		if (user.isPresent()) {
+			return user.get().getPort();
+		} else {
+			return -1;
 		}
 	}
 
