@@ -24,6 +24,13 @@ public class ServerThread extends Thread {
 			// Vi har gjort så att ChatClient alltid skickar sitt username när
 			// den connectar
 			username = input.readUTF();
+			
+			//If the username already exists, it sends back false to the chatclient
+			//It exits the loop when the user enters a valid username
+			while(server.userExists(username)){
+				output.writeUTF("false");
+				username = input.readUTF();
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -55,22 +62,22 @@ public class ServerThread extends Thread {
 
 
 	public void run() {
-
 		try {
-
 			while (true) {
-
 				// Läs klienternas meddelanden från input
 				String message = input.readUTF();
 
 				// Skickar ut meddelandet till alla klienter
-				String whisper = message.substring(0, 3);
 				if (message.compareTo("leave") == 0) {
 					server.removeThread(this);
 					break;
+					
+				}
+				else if (message.length()<3){
+					server.sendMsgToAll(username + ": " + message);
 				}
 				//Skicka privat meddelande om första tre i meddelandet = "/w "
-				else if (whisper.compareTo("/w ") == 0){
+				else if (message.substring(0, 3).compareTo("/w ") == 0){
 					
 					//Få ut vilken användare som meddelandet ska skickas till (efter "/w ")
 					String sendToUser = getUser(message);
@@ -99,4 +106,5 @@ public class ServerThread extends Thread {
 		}
 
 	}
+	
 }
