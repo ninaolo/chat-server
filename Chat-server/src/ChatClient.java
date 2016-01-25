@@ -17,7 +17,6 @@ public class ChatClient {
 	BufferedReader clientInput;
 	String username;
 
-
 	public ChatClient(String username, String serverIP, int port) {
 		this.username = username;
 		try {
@@ -51,10 +50,10 @@ public class ChatClient {
 
 			// Väntar på att klienten ska skriva meddelanden i chatten
 			try {
-				String message = clientInput.readLine()+"";
+				String message = clientInput.readLine() + "";
 				output.writeUTF(message);
-				if (message.compareTo("leave") == 0){
-					System.out.println("Goodbye "+username);
+				if (message.compareTo("leave") == 0) {
+					System.out.println("Goodbye " + username);
 					System.exit(0);
 				}
 
@@ -63,30 +62,29 @@ public class ChatClient {
 			}
 
 		}
-		
+
 	}
-	private String getValidUserName(String user){
-		String valid="";
-		user = user.replaceAll("\\s+","");
-		try{
+
+	private String getValidUserName(String user) {
+		String valid = "";
+		user = user.replaceAll("\\s+", "");
+		try {
 			output.writeUTF(user);
 			valid = serverInput.readUTF();
-			while(valid.compareTo("false")==0){
+			while (valid.compareTo("false") == 0) {
 				System.out.print("Username already taken..., please pick another: ");
 				user = clientInput.readLine();
-				user = user.replaceAll("\\s+","");
+				user = user.replaceAll("\\s+", "");
 				output.writeUTF(user);
 				valid = serverInput.readUTF();
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return user;
-		
-		
+
 	}
-	
 
 	/*
 	 * En privat klass som gör att vi kan ha en kontinuerlig tråd som kör och
