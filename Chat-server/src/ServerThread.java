@@ -36,6 +36,23 @@ public class ServerThread extends Thread {
 	public String getUsername(){
 		return username;
 	}
+	
+	private String getUser(String message){
+		String user = "";
+		message = message.substring(3,message.length());
+		for(int i = 0;i<message.length();i++){
+			String c = message.substring(i,i+1);
+			if(c.compareTo(" ")==0){
+				break;
+			}
+			else{
+				user = user+c;
+			}
+		}
+		return user;
+	}
+
+
 
 	public void run() {
 
@@ -47,12 +64,30 @@ public class ServerThread extends Thread {
 				String message = input.readUTF();
 
 				// Skickar ut meddelandet till alla klienter
-				server.sendMsgToAll(username + ": " + message);
-
+				String whisper = message.substring(0, 3);
 				if (message.compareTo("leave") == 0) {
 					server.removeThread(this);
 					break;
 				}
+				//Skicka privat meddelande om första tre i meddelandet = "/w "
+				else if (whisper.compareTo("/w ") == 0){
+					
+					//Få ut vilken användare som meddelandet ska skickas till (efter "/w ")
+					String sendToUser = getUser(message);
+					
+					//Kolla om användaren existerar, om den gör det så skickar den.
+					if(server.userExists(sendToUser)){
+						message = message.substring(3+sendToUser.length(),message.length());
+						server.sendPrivateMessage(sendToUser,"Private message from "+username+":"+message);
+					}
+					else{
+						output.writeUTF("That user does not exist");
+					}
+				}
+				else{
+					server.sendMsgToAll(username + ": " + message);
+				}
+				
 			}
 
 		} catch (IOException ioe) {

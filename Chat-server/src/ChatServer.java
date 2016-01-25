@@ -65,6 +65,31 @@ public class ChatServer {
 		}
 
 	}
+	
+	public void sendPrivateMessage(String user, String message) {
+		for (ServerThread clientThread : threads) {
+			try{
+				if(clientThread.getUsername().compareTo(user)==0){
+					clientThread.output.writeUTF(message);
+					}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+	
+	
+	
+	public boolean userExists(String userName){
+		for (ServerThread clientThread : threads) {
+			if(clientThread.getUsername().compareTo(userName)==0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 
 	/*
 	 * Används från ServerThread.
