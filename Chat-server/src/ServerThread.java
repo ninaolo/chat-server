@@ -46,6 +46,7 @@ public class ServerThread extends Thread {
 	
 	private String getUser(String message){
 		String user = "";
+		
 		message = message.substring(3,message.length());
 		for(int i = 0;i<message.length();i++){
 			String c = message.substring(i,i+1);
