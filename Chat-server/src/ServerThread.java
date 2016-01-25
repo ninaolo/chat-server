@@ -24,10 +24,11 @@ public class ServerThread extends Thread {
 			// Vi har gjort så att ChatClient alltid skickar sitt username när
 			// den connectar
 			username = input.readUTF();
-			
-			//If the username already exists, it sends back false to the chatclient
-			//It exits the loop when the user enters a valid username
-			while(server.userExists(username)){
+
+			// If the username already exists, it sends back false to the
+			// chatclient
+			// It exits the loop when the user enters a valid username
+			while (server.userExists(username)) {
 				output.writeUTF("false");
 				username = input.readUTF();
 			}
@@ -39,28 +40,33 @@ public class ServerThread extends Thread {
 		// Startar upp tråden genom att kalla på run()
 		start();
 	}
-	
-	public String getUsername(){
+
+	public String getUsername() {
 		return username;
 	}
-	
-	private String getUser(String message){
+
+	public String getIP() {
+		return clientSocket.getRemoteSocketAddress().toString();
+	}
+
+	public int getPort() {
+		return clientSocket.getPort();
+	}
+
+	private String getUser(String message) {
 		String user = "";
-		
-		message = message.substring(3,message.length());
-		for(int i = 0;i<message.length();i++){
-			String c = message.substring(i,i+1);
-			if(c.compareTo(" ")==0){
+
+		message = message.substring(3, message.length());
+		for (int i = 0; i < message.length(); i++) {
+			String c = message.substring(i, i + 1);
+			if (c.compareTo(" ") == 0) {
 				break;
-			}
-			else{
-				user = user+c;
+			} else {
+				user = user + c;
 			}
 		}
 		return user;
 	}
-
-
 
 	public void run() {
 		try {
@@ -72,30 +78,29 @@ public class ServerThread extends Thread {
 				if (message.compareTo("leave") == 0) {
 					server.removeThread(this);
 					break;
-					
-				}
-				else if (message.length()<3){
+
+				} else if (message.length() < 3) {
 					server.sendMsgToAll(username + ": " + message);
 				}
-				//Skicka privat meddelande om första tre i meddelandet = "/w "
-				else if (message.substring(0, 3).compareTo("/w ") == 0){
-					
-					//Få ut vilken användare som meddelandet ska skickas till (efter "/w ")
+				// Skicka privat meddelande om första tre i meddelandet = "/w "
+				else if (message.substring(0, 3).compareTo("/w ") == 0) {
+
+					// Få ut vilken användare som meddelandet ska skickas till
+					// (efter "/w ")
 					String sendToUser = getUser(message);
-					
-					//Kolla om användaren existerar, om den gör det så skickar den.
-					if(server.userExists(sendToUser)){
-						message = message.substring(3+sendToUser.length(),message.length());
-						server.sendPrivateMessage(sendToUser,"Private message from "+username+":"+message);
-					}
-					else{
+
+					// Kolla om användaren existerar, om den gör det så skickar
+					// den.
+					if (server.userExists(sendToUser)) {
+						message = message.substring(3 + sendToUser.length(), message.length());
+						server.sendPrivateMessage(sendToUser, "Private message from " + username + ":" + message);
+					} else {
 						output.writeUTF("That user does not exist");
 					}
-				}
-				else{
+				} else {
 					server.sendMsgToAll(username + ": " + message);
 				}
-				
+
 			}
 
 		} catch (IOException ioe) {
@@ -107,5 +112,5 @@ public class ServerThread extends Thread {
 		}
 
 	}
-	
+
 }
