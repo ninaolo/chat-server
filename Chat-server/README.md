@@ -24,9 +24,9 @@ they belong to?
 3. ...
 4. ...
 5. These belong to the TCP protocol. ACK and SYN are flags which can be set in the TCP header. There are also two important values in the header: acknowledgement number and sequence (SEQ) number, and these are not flags. To establish a connection, TCP uses a so-called `three-way handshake`.
-* SYN: The client wants to connect to the server and sets the sequence number to a random value (A).
-* SYN-ACK: The server replies and sets the acknowledgement number to A+1 and SEQ to another random number (B).
-⋅⋅* ACK: The client sends ACK back to the server with an acknowledgement number of B+1 and a SEQ of A+1.
+  * SYN: The client wants to connect to the server and sets the sequence number to a random value (A).
+  * SYN-ACK: The server replies and sets the acknowledgement number to A+1 and SEQ to another random number (B).
+  * ACK: The client sends ACK back to the server with an acknowledgement number of B+1 and a SEQ of A+1.
 6. ...
 
 
