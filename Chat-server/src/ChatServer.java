@@ -3,6 +3,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import org.json.simple.JSONObject;
+
 // OBS: tänk på synchronized, hur löser vi detta så att man inte tar bort trådar samtidigt som man loopar igenom dem?
 
 /*
@@ -55,10 +57,11 @@ public class ChatServer {
 
 	}
 
-	public void sendMsgToAll(String message) {
+	public void sendMsgToAll(JSONObject json) {
+		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
 			try {
-				clientThread.output.writeUTF(message);
+				clientThread.output.writeUTF(server_json);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -66,11 +69,13 @@ public class ChatServer {
 
 	}
 	
-	public void sendPrivateMessage(String user, String message) {
+	public void sendPrivateMessage(JSONObject json) {
+		String user = (String) json.get("TO");
+		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
 			try{
 				if(clientThread.getUsername().compareTo(user)==0){
-					clientThread.output.writeUTF(message);
+					clientThread.output.writeUTF(server_json);
 					}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -106,9 +111,12 @@ public class ChatServer {
 		}
 		thread.interrupt();
 		threads.remove(thread);
-		sendMsgToAll(tempName+" has left the chatroom");
-		System.out.println("User "+tempName+" has left the chatroom");
-		
+		JSONObject server_json = new JSONObject();
+		server_json.put("REQUEST", "send_to_all");
+		server_json.put("CONTENT", "User "+tempName+" has left the chatroom");
+		server_json.put("TO", "");
+		server_json.put("FROM","server");
+		sendMsgToAll(server_json);
 	}
 
 	/*
