@@ -241,7 +241,10 @@ public class ChatClient {
 						System.out.println("### " + from + " rejected your request to send a file. ###");
 
 					} else if (request.compareTo("send_address") == 0) {
-
+						String[] connectionInfo = content.split(":");
+						String IP = connectionInfo[0];
+						int port = Integer.parseInt(connectionInfo[1]);
+						receiveBinaryFile(IP, port);
 					}
 				}
 
