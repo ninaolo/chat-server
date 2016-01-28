@@ -2,13 +2,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.text.ParseException;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 /*
- * Klass för en server-tråd som sköter kommunikationen med en klient.
+ * Represents a server thread which deals with the communication with a client in a chat server.
  */
 public class ServerThread extends Thread {
 
@@ -19,11 +18,10 @@ public class ServerThread extends Thread {
 	public String username;
 	JSONObject json;
 	JSONParser parser = new JSONParser();
-	String request;
-	String content;
-	String to;
-	String from;
-	
+	private String request;
+	private String content;
+	private String to;
+	private String from;
 
 	public ServerThread(ChatServer server, Socket clientSocket) {
 		this.server = server;
@@ -56,7 +54,6 @@ public class ServerThread extends Thread {
 		return username;
 	}
 
-
 	public String getIP() {
 		return clientSocket.getRemoteSocketAddress().toString();
 	}
@@ -68,49 +65,40 @@ public class ServerThread extends Thread {
 	public void run() {
 		try {
 			while (true) {
-				// Läs klienternas meddelanden från input
+				// Read client messages from input
 				String message = input.readUTF();
-				try{
+				try {
 					json = (JSONObject) parser.parse(message);
 				} catch (org.json.simple.parser.ParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				request = (String) json.get("REQUEST");
 				content = (String) json.get("CONTENT");
 				to = (String) json.get("TO");
 				from = (String) json.get("from");
-				
-				
-				
-				
-				//Tar bort klienten
-				if(request.compareTo("leave")==0){
+
+				if (request.compareTo("leave") == 0) {
 					server.removeThread(this);
 					break;
 				}
-				
-				else if (request.compareTo("send_to_all")==0){
+
+				else if (request.compareTo("send_to_all") == 0) {
 					server.sendMsgToAll(json);
 				}
-				
-				
-				//Skicka privat meddelande om första tre i meddelandet = "/w "
-				else if (request.compareTo("whisper")==0){
-					if(server.userExists(to)){
+
+				else if (request.compareTo("whisper") == 0) {
+					if (server.userExists(to)) {
 						server.sendPrivateMessage(json);
-					}
-					else{
+					} else {
 						JSONObject server_json = new JSONObject();
 						server_json.put("REQUEST", "server_info");
 						server_json.put("CONTENT", "That user does not exist");
 						server_json.put("TO", username);
-						server_json.put("FROM","server");
+						server_json.put("FROM", "server");
 						String sendmessage = server_json.toJSONString();
 						output.writeUTF(sendmessage);
 					}
-				}
-				else if (request.compareTo("send_file")==0){
+				} else if (request.compareTo("send_file") == 0) {
 				}
 
 			}
@@ -119,7 +107,7 @@ public class ServerThread extends Thread {
 			ioe.printStackTrace();
 
 		} finally {
-			// Om inte detta görs kan det bli massa döda trådar kvar
+			// If this isn't done, many dead threads can be left
 			server.removeThread(this);
 		}
 
