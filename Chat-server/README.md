@@ -29,7 +29,7 @@ they belong to?
   * **Application:** This layer defines the application protocols and how host programs create user data and communicate this to other applications by making use of the services in the lower layers (especially the transport layer). Examples: FTP, HTTP and SSH.
   * **Transport:** Performs communication between hosts on either local or remote networks. Examples: TCP and UDP (see description in question 6).
   * **Internet:** Exchanges data across network boundaries and packages the data into IP datagrams/packets, containing source and destination address. The primary protocol is the Internet Protocol (IP). It performs routing by transporting datagrams to the next IP router closer to the final destination.
-  * **Network:** This layer has details of how data is physically sent through a network. This includes mapping IP addresses to physical hardware addresses (MAC) and protocols for the physical data transfer to coaxial cables, optical fiber and so on. Example: ethernet.
+  * **Network Access:** This layer has details of how data is physically sent through a network. This includes mapping IP addresses to physical hardware addresses (MAC) and protocols for the physical data transfer to coaxial cables, optical fiber and so on. Example: ethernet.
 
 5. These belong to the TCP protocol. ACK and SYN are flags which can be set in the TCP header. There are also two important values in the header: acknowledgement number and sequence (SEQ) number, and these are not flags. To establish a connection, TCP uses a so-called `three-way handshake`.
   * **SYN:** The client wants to connect to the server and sets the sequence number to a random value (A).
