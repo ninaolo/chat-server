@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.json.simple.JSONObject;
 
@@ -68,7 +69,7 @@ public class ChatServer {
 		}
 
 	}
-	
+
 	public void sendPrivateMessage(JSONObject json) {
 		String user = (String) json.get("TO");
 		String server_json = json.toJSONString();
@@ -83,18 +84,15 @@ public class ChatServer {
 		}
 
 	}
-	
-	
-	
-	public boolean userExists(String userName){
+
+	public boolean userExists(String userName) {
 		for (ServerThread clientThread : threads) {
-			if(clientThread.getUsername().compareTo(userName)==0){
+			if (clientThread.getUsername().compareTo(userName) == 0) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
 
 	/*
 	 * Används från ServerThread.
@@ -131,6 +129,30 @@ public class ChatServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	/*
+	 * Gets the remote IP corresponding to the given username.
+	 */
+	public String getClientIP(String username) {
+		Optional<ServerThread> user = threads.stream().filter(t -> t.username == username).findFirst();
+		if (user.isPresent()) {
+			return user.get().getIP();
+		} else {
+			return "";
+		}
+	}
+
+	/*
+	 * Gets the remote port corresponding to the given username.
+	 */
+	public int getClientPort(String username) {
+		Optional<ServerThread> user = threads.stream().filter(t -> t.username == username).findFirst();
+		if (user.isPresent()) {
+			return user.get().getPort();
+		} else {
+			return -1;
 		}
 	}
 

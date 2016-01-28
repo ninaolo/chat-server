@@ -35,10 +35,11 @@ public class ServerThread extends Thread {
 			// Vi har gjort så att ChatClient alltid skickar sitt username när
 			// den connectar
 			username = input.readUTF();
-			
-			//If the username already exists, it sends back false to the chatclient
-			//It exits the loop when the user enters a valid username
-			while(server.userExists(username)){
+
+			// If the username already exists, it sends back false to the
+			// chatclient
+			// It exits the loop when the user enters a valid username
+			while (server.userExists(username)) {
 				output.writeUTF("false");
 				username = input.readUTF();
 			}
@@ -50,30 +51,19 @@ public class ServerThread extends Thread {
 		// Startar upp tråden genom att kalla på run()
 		start();
 	}
-	
-	public String getUsername(){
+
+	public String getUsername() {
 		return username;
 	}
-	
 
-	
-	private String getUser(String message){
-		String user = "";
-		
-		message = message.substring(3,message.length());
-		for(int i = 0;i<message.length();i++){
-			String c = message.substring(i,i+1);
-			if(c.compareTo(" ")==0){
-				break;
-			}
-			else{
-				user = user+c;
-			}
-		}
-		return user;
+
+	public String getIP() {
+		return clientSocket.getRemoteSocketAddress().toString();
 	}
 
-
+	public int getPort() {
+		return clientSocket.getPort();
+	}
 
 	public void run() {
 		try {
@@ -121,9 +111,8 @@ public class ServerThread extends Thread {
 					}
 				}
 				else if (request.compareTo("send_file")==0){
-					
 				}
-				
+
 			}
 
 		} catch (IOException ioe) {
@@ -135,6 +124,4 @@ public class ServerThread extends Thread {
 		}
 
 	}
-	
-	
 }
