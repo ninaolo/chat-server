@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /*
  * En klass för ett användargränssnitt som beskriver en klient till chatt-programmet.
@@ -16,6 +21,7 @@ public class ChatClient {
 	DataOutputStream output;
 	BufferedReader clientInput;
 	String username;
+	JSONParser parser = new JSONParser();
 
 	public ChatClient(String username, String serverIP, int port) {
 		this.username = username;
@@ -51,11 +57,10 @@ public class ChatClient {
 			// Väntar på att klienten ska skriva meddelanden i chatten
 			try {
 				String message = clientInput.readLine() + "";
-				output.writeUTF(message);
-				if (message.compareTo("leave") == 0) {
-					System.out.println("Goodbye " + username);
-					System.exit(0);
-				}
+
+				JSONObject json = parseMessage(message);
+
+				output.writeUTF(json.toJSONString());
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -63,6 +68,76 @@ public class ChatClient {
 
 		}
 
+	}
+
+	/*
+	 * Parses the written message and creates a JSON object to store the
+	 * protocol values which later shall be sent to the server.
+	 */
+	private JSONObject parseMessage(String message) {
+
+		JSONObject json = new JSONObject();
+
+		if (message.compareTo("leave") == 0) {
+			System.out.println("Goodbye " + username);
+			System.exit(0);
+			json.put("REQUEST", "leave");
+			json.put("TO", "");
+			json.put("FROM", username);
+			json.put("CONTENT", "");
+		}
+
+		else if (message.length() < 3) {
+			json.put("REQUEST", "send_to_all");
+			json.put("TO", "");
+			json.put("FROM", username);
+			json.put("CONTENT", message);
+		}
+
+		else if (message.substring(0, 3).compareTo("/s ") == 0) {
+			String sendToUser = getUser(message);
+			String fileName = message.substring(3 + sendToUser.length(), message.length());
+			json.put("REQUEST", "send_file");
+			json.put("TO", sendToUser);
+			json.put("FROM", username);
+			json.put("CONTENT", fileName);
+		}
+
+		else if (message.substring(0, 3).compareTo("/w ") == 0) {
+			String sendToUser = getUser(message);
+			String content = message.substring(3 + sendToUser.length(), message.length());
+			json.put("REQUEST", "whisper");
+			json.put("TO", sendToUser);
+			json.put("FROM", username);
+			json.put("CONTENT", content);
+		}
+
+		else {
+			json.put("REQUEST", "send_to_all");
+			json.put("TO", "");
+			json.put("FROM", username);
+			json.put("CONTENT", message);
+		}
+
+		return json;
+	}
+
+	/*
+	 * Parses the message to retrieve the username within it.
+	 */
+	private String getUser(String message) {
+		String user = "";
+
+		message = message.substring(3, message.length());
+		for (int i = 0; i < message.length(); i++) {
+			String c = message.substring(i, i + 1);
+			if (c.compareTo(" ") == 0) {
+				break;
+			} else {
+				user = user + c;
+			}
+		}
+		return user;
 	}
 
 	private String getValidUserName(String user) {
@@ -96,14 +171,58 @@ public class ChatClient {
 
 			try {
 
+				// Wait for requests/messages from other clients or the server.
 				while (true) {
-					// Hämta meddelanden hela tiden och printa ut
+
 					String message = serverInput.readUTF();
-					System.out.println(message);
+
+					JSONObject json = (JSONObject) parser.parse(message);
+
+					String request = (String) json.get("REQUEST");
+					String to = (String) json.get("TO");
+					String from = (String) json.get("FROM");
+					String content = (String) json.get("CONTENT");
+
+					if (request.compareTo("send_to_all") == 0) {
+						System.out.println(from + ": " + content);
+					}
+
+					else if (request.compareTo("whisper") == 0) {
+						System.out.println(from + " (whisper): " + content);
+					}
+
+					else if (request.compareTo("server_info") == 0) {
+						System.out.println(content);
+					}
+
+					else if (request.compareTo("send_file") == 0) {
+						Scanner scanner = new Scanner(System.in);
+						System.out.println("### " + from
+								+ " wants to send a file to you. Do you accept the request? Type yes/no. ###");
+						while (true) {
+							String answer = scanner.nextLine();
+							if (answer.compareTo("yes") == 0) {
+								break;
+							} else if (answer.compareTo("no") == 0) {
+								break;
+							} else {
+								System.out.println("Please type 'yes' or 'no'.");
+							}
+						}
+					}
+
+					else if (request.compareTo("accept_file") == 0) {
+						System.out.println("### " + from + " accepted your request to send a file. ###");
+
+					} else if (request.compareTo("reject_file") == 0) {
+						System.out.println("### " + from + " rejected your request to send a file. ###");
+					}
 				}
 
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
+			} catch (ParseException p) {
+				p.printStackTrace();
 			}
 		}
 	}
@@ -113,7 +232,7 @@ public class ChatClient {
 	 * får välja
 	 */
 	public static void main(String[] args) {
-		new ChatClient(args[0], "127.0.0.1", 1337);
+		new ChatClient(args[0], args[1], 1337);
 	}
 
 }
