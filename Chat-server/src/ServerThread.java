@@ -98,7 +98,75 @@ public class ServerThread extends Thread {
 						String sendmessage = server_json.toJSONString();
 						output.writeUTF(sendmessage);
 					}
-				} else if (request.compareTo("send_file") == 0) {
+				} 
+				else if(request.compareTo("send_file")==0){
+					server.fileSendRequest(json);
+				}
+				
+				else if (request.compareTo("recive_file")==0){
+					if(server.userExists(to)){
+						boolean loop = true;
+						while(loop){
+							message = input.readUTF();
+							JSONObject send_json = (JSONObject) parser.parse(message);
+							String answer = (String) send_json.get("CONTENT");
+							String fileSender = (String) json.get("FROM");
+							if(answer.compareTo("yes")==0){
+								JSONObject server_json = new JSONObject();
+								server_json.put("REQUEST", "accept_file");
+								server_json.put("CONTENT",username+ " accepted the file request");
+								server_json.put("TO", fileSender);
+								server_json.put("FROM",username);
+								server.respond(server_json);
+								
+								server_json = new JSONObject();
+								server_json.put("REQUEST", "server_info");
+								server_json.put("CONTENT", "You have accepted the clients request");
+								server_json.put("TO", username);
+								server_json.put("FROM","server");
+								String sendmessage = server_json.toJSONString();
+								output.writeUTF(sendmessage);
+								loop = false;
+							}
+							else if(answer.compareTo("no")==0){
+								JSONObject server_json = new JSONObject();
+								server_json.put("REQUEST", "reject_file");
+								server_json.put("CONTENT", username+" rejected the file.");
+								server_json.put("TO", fileSender);
+								server_json.put("FROM",username);
+								server.respond(server_json);
+
+								server_json = new JSONObject();
+								server_json.put("REQUEST", "server_info");
+								server_json.put("CONTENT", "You have declined the clients request");
+								server_json.put("TO", username);
+								server_json.put("FROM","server");
+								String sendmessage = server_json.toJSONString();
+								output.writeUTF(sendmessage);
+								loop = false;
+							}
+							else{
+								JSONObject server_json = new JSONObject();
+								server_json.put("REQUEST", "server_info");
+								server_json.put("CONTENT", "You need to write better");
+								server_json.put("TO", username);
+								server_json.put("FROM","server");
+								String sendmessage = server_json.toJSONString();
+								output.writeUTF(sendmessage);
+							}
+							
+						}
+						
+					}
+					else{
+						JSONObject server_json = new JSONObject();
+						server_json.put("REQUEST", "server_info");
+						server_json.put("CONTENT", "That user does not exist");
+						server_json.put("TO", username);
+						server_json.put("FROM","server");
+						String sendmessage = server_json.toJSONString();
+						output.writeUTF(sendmessage);
+					}
 				}
 
 			}
@@ -106,8 +174,11 @@ public class ServerThread extends Thread {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 
+		} catch (org.json.simple.parser.ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally {
-			// If this isn't done, many dead threads can be left
+			// Om inte detta görs kan det bli massa döda trådar kvar
 			server.removeThread(this);
 		}
 
