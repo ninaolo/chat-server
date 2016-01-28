@@ -6,14 +6,14 @@ import java.util.Optional;
 
 import org.json.simple.JSONObject;
 
-// OBS: tänk på synchronized, hur löser vi detta så att man inte tar bort trådar samtidigt som man loopar igenom dem?
+// OBS: synchronized, hur löser vi detta så att man inte tar bort trådar samtidigt som man loopar igenom dem?
 
 /*
- * En klass för servern till en multi-trådad chatt som kan ha flera klienter kopplade till sig.
+ * Represents a chat server to a multi-threaded chat which can accept multiple clients.
  */
 public class ChatServer {
 
-	// En random port som vi valt för servern
+	// A random port we chose for the server
 	private int port = 1337;
 	private ServerSocket serverSocket;
 	private ArrayList<ServerThread> threads;
@@ -31,20 +31,22 @@ public class ChatServer {
 
 	}
 
+	/*
+	 * Listens for connecting clients forever.
+	 */
 	private void listen() throws IOException {
 
 		System.out.println("Listening on port " + port + ".");
 
-		// Vi accepterar connections för evigt
 		while (true) {
 
-			// Returnerar en ny socket för varje ny connection. Om det inte
-			// finns någon blockar den.
+			// Returns a new socket for every new connection. If there is no one
+			// it blocks here
 			System.out.println("Waiting for client to connect...");
 			Socket clientSocket = serverSocket.accept();
 			System.out.println("New client connected on port " + clientSocket.getPort() + ".");
 
-			// Skapa en ny tråd för varje ny klient
+			// Create a new thread for every client
 			ServerThread thread = new ServerThread(this, clientSocket);
 
 			thread.output
@@ -52,12 +54,16 @@ public class ChatServer {
 							+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.");
 			clientAdded(thread);
 
-			// Lägg till den nya chat-användaren till listan
+			// Add the new chat user to a list
 			threads.add(thread);
 		}
 
 	}
 
+	/*
+	 * Sends a message to all clients by retrieving data from a json object
+	 * representing a request.
+	 */
 	public void sendMsgToAll(JSONObject json) {
 		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
@@ -70,14 +76,17 @@ public class ChatServer {
 
 	}
 
+	/*
+	 * Sends a private message (whisper) by retrieving data from a json object.
+	 */
 	public void sendPrivateMessage(JSONObject json) {
 		String user = (String) json.get("TO");
 		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
-			try{
-				if(clientThread.getUsername().compareTo(user)==0){
+			try {
+				if (clientThread.getUsername().compareTo(user) == 0) {
 					clientThread.output.writeUTF(server_json);
-					}
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -85,6 +94,9 @@ public class ChatServer {
 
 	}
 
+	/*
+	 * Checks if a user is connected to the chat.
+	 */
 	public boolean userExists(String userName) {
 		for (ServerThread clientThread : threads) {
 			if (clientThread.getUsername().compareTo(userName) == 0) {
@@ -95,7 +107,7 @@ public class ChatServer {
 	}
 
 	/*
-	 * Används från ServerThread.
+	 * Used from ServerThread.
 	 */
 	public void removeThread(ServerThread thread) {
 		System.out.println("A user wants to leave the chat room. Processing...");
@@ -111,15 +123,14 @@ public class ChatServer {
 		threads.remove(thread);
 		JSONObject server_json = new JSONObject();
 		server_json.put("REQUEST", "send_to_all");
-		server_json.put("CONTENT", "User "+tempName+" has left the chatroom");
+		server_json.put("CONTENT", "User " + tempName + " has left the chatroom");
 		server_json.put("TO", "");
-		server_json.put("FROM","server");
+		server_json.put("FROM", "server");
 		sendMsgToAll(server_json);
 	}
 
 	/*
-	 * Skickar ett meddelande till alla andra när en ny klient ansluter till
-	 * chatten.
+	 * Sends a message to all others when a new client connects to the chat.
 	 */
 	private void clientAdded(ServerThread newThread) {
 		for (ServerThread clientThread : threads) {
@@ -156,7 +167,7 @@ public class ChatServer {
 		}
 	}
 
-	// Main: skapa en ny server
+	// Main: create a new server
 	public static void main(String[] args) throws IOException {
 		new ChatServer();
 	}
