@@ -272,6 +272,7 @@ public class ChatClient {
 				Socket otherClientSocket = clientServerSocket.accept();
 				ObjectOutputStream outStream = new ObjectOutputStream(otherClientSocket.getOutputStream());
 				outStream.writeObject(file);
+				clientServerSocket.close();
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -308,6 +309,7 @@ public class ChatClient {
 			}
 			fileOut.close();
 			fileIn.close();
+			socket.close();
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
