@@ -211,6 +211,7 @@ public class ChatClient {
 					}
 					
 					else if (request.compareTo("recive_file")==0){
+						System.out.println("User "+from+" wants to send a file to you. yes/no");
 						output.writeUTF(json.toJSONString());
 					}
 
