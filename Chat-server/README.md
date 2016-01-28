@@ -16,6 +16,7 @@
 5. What does the flags, ACK, SYN and SEQ mean and what protocol do
 they belong to?
 6. What is the difference between TCP and UDP?
+7. What is the advantage of this procedure for transferring files (described in lab) compared with other procedure like there the client B starts a ServerSocket for aim of uploading files?
 
 
 ##Answers
