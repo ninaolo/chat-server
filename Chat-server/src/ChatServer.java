@@ -93,6 +93,42 @@ public class ChatServer {
 		}
 
 	}
+	
+	public void respond(JSONObject json) {
+		String user = (String) json.get("TO");
+		String server_json = json.toJSONString();
+		for (ServerThread clientThread : threads) {
+			try{
+				if(clientThread.getUsername().compareTo(user)==0){
+					clientThread.output.writeUTF(server_json);
+					}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+	
+	public void fileSendRequest(JSONObject json) {
+		String user = (String) json.get("TO");
+		String from = (String) json.get("FROM");
+		JSONObject server_json = new JSONObject();
+		server_json.put("REQUEST", "recive_file");
+		server_json.put("CONTENT", "Wants to send you a file");
+		server_json.put("TO", user);
+		server_json.put("FROM",from);
+		String sendmessage = server_json.toJSONString();
+		for (ServerThread clientThread : threads) {
+			try{
+				if(clientThread.getUsername().compareTo(user)==0){
+					clientThread.output.writeUTF(sendmessage);
+					}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 
 	/*
 	 * Checks if a user is connected to the chat.
@@ -133,14 +169,12 @@ public class ChatServer {
 	 * Sends a message to all others when a new client connects to the chat.
 	 */
 	private void clientAdded(ServerThread newThread) {
-		for (ServerThread clientThread : threads) {
-			try {
-				clientThread.output.writeUTF(newThread.username + " joined the chat! There are now "
-						+ (threads.size() + 1) + " users in the chat room.");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		JSONObject server_json = new JSONObject();
+		server_json.put("REQUEST", "send_to_all");
+		server_json.put("CONTENT", newThread.username + " joined the chat! There are now "+ (threads.size() + 1) + " users in the chat room.");
+		server_json.put("TO", "");
+		server_json.put("FROM","server");
+		sendMsgToAll(server_json);
 	}
 
 	/*
