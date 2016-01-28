@@ -20,14 +20,25 @@ they belong to?
 
 ##Answers
 1. The `ChatServer` has one main thread waiting for clients to connect and then creates one thread for every new client. This results in n+1 threads. The `ChatClient` has one main thread waiting for input by the user, and one thread (which we have called `ChatListener`) waiting for messages from other clients or the server.
+
 2. ...
+
 3. ...
+
 4. ...
+
 5. These belong to the TCP protocol. ACK and SYN are flags which can be set in the TCP header. There are also two important values in the header: acknowledgement number and sequence (SEQ) number, and these are not flags. To establish a connection, TCP uses a so-called `three-way handshake`.
   * SYN: The client wants to connect to the server and sets the sequence number to a random value (A).
   * SYN-ACK: The server replies and sets the acknowledgement number to A+1 and SEQ to another random number (B).
   * ACK: The client sends ACK back to the server with an acknowledgement number of B+1 and a SEQ of A+1.
-6. ...
+
+6. They are both protocols which work at the transport layer, but differ on a few points:
+  * **Reliability:** If connection fails, TCP will retry to send the packages to get them delivered, whereas with UDP data could get lost on the way. TCP does error checking and UDP does not.
+  * **Handshake:** TCP does the SYN, SYN-ACK, ACK (described above) but UDP has no handshake.
+  * **Order:** TCP keeps track of the order in which data is sent, but UDP doesn't.
+  * **Streaming:** TCP is sent as a stream and UDP is sent package by package.
+  * **Size:** TCP header size is big (20 bytes) and UDP is small (8 bytes).
+  * **Usage:** Because of the above, TCP should be used in cases where high reliability is required and transmission time is less important (for example email). UDP should on the other hand be used when you need something lighweight which transports data efficiently, like in games or when streaming videos (and it isn't the end of the world if one bit here and there is in the wrong order or gets lost on the way...)
 
 
 
