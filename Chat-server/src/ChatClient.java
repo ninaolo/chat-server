@@ -1,8 +1,17 @@
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -12,7 +21,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /*
- * En klass för ett användargränssnitt som beskriver en klient till chatt-programmet.
+ * Represents a client which can connect to a chat server.
  */
 public class ChatClient {
 
@@ -22,26 +31,33 @@ public class ChatClient {
 	BufferedReader clientInput;
 	String username;
 	JSONParser parser = new JSONParser();
+	int clientPort = 5555; // Port used for sending byte files
+	String clientIP;
+	Frame fileFrame = new Frame(); // Used for displaying file option
 
 	public ChatClient(String username, String serverIP, int port) {
+
 		this.username = username;
+
 		try {
 
-			// Starta upp vår connection
+			this.clientIP = InetAddress.getLocalHost().toString();
+
+			// Start connection to chat server
 			System.out.println("Trying to connect...");
 			clientSocket = new Socket(serverIP, port);
 			System.out.println("Successfully connected to port " + clientSocket.getPort() + " on host "
 					+ clientSocket.getLocalAddress() + ".");
 
-			// Hämta input och output-strömmar
+			// get input and output streams
 			serverInput = new DataInputStream(clientSocket.getInputStream());
 			output = new DataOutputStream(clientSocket.getOutputStream());
 			clientInput = new BufferedReader(new InputStreamReader(System.in));
 
-			// Skickar username på output så ServerThread kan hämta det
+			// Sends username on output so that ServerThread can save it
 			username = this.getValidUserName(username);
 
-			// Starta upp en tråd som lyssnar på meddelanden från servern
+			// Start a thread which listened for chat messages
 			new Thread(new ChatListener()).start();
 
 		} catch (UnknownHostException e) {
@@ -52,9 +68,8 @@ public class ChatClient {
 			e.printStackTrace();
 		}
 
+		// Waits for the client to write messages in the chat
 		while (true) {
-
-			// Väntar på att klienten ska skriva meddelanden i chatten
 			try {
 				String message = clientInput.readLine() + "";
 
@@ -214,8 +229,19 @@ public class ChatClient {
 					else if (request.compareTo("accept_file") == 0) {
 						System.out.println("### " + from + " accepted your request to send a file. ###");
 
+						JSONObject connectionInfo = new JSONObject();
+						connectionInfo.put("REQUEST", "send_address");
+						connectionInfo.put("TO", from);
+						connectionInfo.put("FROM", username);
+						connectionInfo.put("CONTENT", clientIP + ":" + clientPort);
+						output.writeUTF(connectionInfo.toJSONString());
+						sendBinaryFile(new File(content));
+
 					} else if (request.compareTo("reject_file") == 0) {
 						System.out.println("### " + from + " rejected your request to send a file. ###");
+
+					} else if (request.compareTo("send_address") == 0) {
+
 					}
 				}
 
@@ -224,6 +250,68 @@ public class ChatClient {
 			} catch (ParseException p) {
 				p.printStackTrace();
 			}
+		}
+	}
+
+	/*
+	 * Sends an arbitrary binary file on the output stream for someone else to
+	 * fetch.
+	 */
+	private void sendBinaryFile(File file) {
+
+		if (!file.exists()) {
+			System.out.println("The file you wish to send does not exist.");
+
+		} else {
+
+			try {
+				ServerSocket clientServerSocket = new ServerSocket(clientPort);
+				Socket otherClientSocket = clientServerSocket.accept();
+				ObjectOutputStream outStream = new ObjectOutputStream(otherClientSocket.getOutputStream());
+				outStream.writeObject(file);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/*
+	 * Opens a socket and attempts to receive a binary file from input stream.
+	 */
+	private void receiveBinaryFile(String IP, int port) {
+		try {
+			Socket socket = new Socket(IP, port);
+			System.out.println("Successfully connected to IP " + IP + ". Trying to download file...");
+			ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+			File file = (File) input.readObject();
+			System.out.println("Successfully downloaded file: [" + file.getName() + "].");
+
+			// Opens a file dialog where you can choose a destination for the
+			// file
+			FileDialog fd = new FileDialog(fileFrame, "Choose a destination", FileDialog.LOAD);
+			fd.setDirectory(null);
+			fd.setFile(file.getName());
+			fd.setVisible(true);
+
+			// Copies the file object to the chosen path
+			FileInputStream fileIn = null;
+			FileOutputStream fileOut = null;
+			fileIn = new FileInputStream(file);
+			fileOut = new FileOutputStream(fd.getDirectory() + fd.getFile());
+			int read;
+			while ((read = fileIn.read()) != -1) {
+				fileOut.write(read);
+			}
+			fileOut.close();
+			fileIn.close();
+
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 
