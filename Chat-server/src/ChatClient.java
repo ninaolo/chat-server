@@ -209,21 +209,9 @@ public class ChatClient {
 					else if (request.compareTo("server_info") == 0) {
 						System.out.println(content);
 					}
-
-					else if (request.compareTo("send_file") == 0) {
-						Scanner scanner = new Scanner(System.in);
-						System.out.println("### " + from
-								+ " wants to send a file to you. Do you accept the request? Type yes/no. ###");
-						while (true) {
-							String answer = scanner.nextLine();
-							if (answer.compareTo("yes") == 0) {
-								break;
-							} else if (answer.compareTo("no") == 0) {
-								break;
-							} else {
-								System.out.println("Please type 'yes' or 'no'.");
-							}
-						}
+					
+					else if (request.compareTo("recive_file")==0){
+						output.writeUTF(json.toJSONString());
 					}
 
 					else if (request.compareTo("accept_file") == 0) {
