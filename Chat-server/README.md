@@ -22,7 +22,7 @@ they belong to?
 ##Answers
 1. The `ChatServer` has one main thread waiting for clients to connect and then creates one thread for every new client. This results in n+1 threads. The `ChatClient` has one main thread waiting for input by the user, and one thread (which we have called `ChatListener`) waiting for messages from other clients or the server.
 
-2. ...
+2. The `synchronized` keyword can be used both for methods and statements and is important to use when multiple thread are accessing the same resources. Two synchronized methods cannot access the same object at the same time and the one using it blocks all other threads. The point of this is to make sure variables are accessed in an atomic way. Otherwise one thread might not see changes another thread has made, or it could be half changed and left in an invalid state. Synchronized statements are a more fine-grained synchronization than synchronize methods.
 
 3. The `java.lang.Runnable` is an interface in java which a class can implement. To use it, one can create a java `Thread` and pass the Runnable to it. When calling `Thread.start()` it calls the interface's `run()` method which executes a separate thread (an independent path of execution) which can be used to do things in parallel. One can also extend the class `java.lang.Thread` instead of using the interface, but this is basically the same thing. There are some differences (for example, multiple inheritance is not allowed in java and you can therefore not inherit from any other class if you inherit from Thread) but we will not discuss this further.
 
