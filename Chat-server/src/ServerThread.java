@@ -103,37 +103,41 @@ public class ServerThread extends Thread {
 						output.writeUTF(server_json.toJSONString());
 					}
 				} else if (request.compareTo("send_file") == 0) {
-					server.sendPrivateMessage(
-							getJson("receive_file", "", (String) json.get("TO"), (String) json.get("FROM")));
+					server.sendPrivateMessage(getJson("receive_file", (String) json.get("CONTENT"),
+							(String) json.get("TO"), (String) json.get("FROM")));
 				}
 
 				else if (request.compareTo("receive_file") == 0) {
+
 					if (server.userExists(to)) {
 						boolean loop = true;
+						String fileName = (String) json.get("CONTENT");
+
 						while (loop) {
 							message = input.readUTF();
 							JSONObject send_json = (JSONObject) parser.parse(message);
 							String answer = (String) send_json.get("CONTENT");
 							String fileSender = (String) json.get("FROM");
+
 							if (answer.compareTo("yes") == 0) {
-								JSONObject server_json = getJson("accept_file", username + " accepted the file request",
-										fileSender, username);
+								JSONObject server_json = getJson("accept_file", fileName, fileSender, username);
 								server.sendPrivateMessage(server_json);
-								server_json = getJson("server_info", "You have accepted the clients request", username,
-										"server");
+								server_json = getJson("server_info", "You have accepted the client's request", username,
+										"Server");
 								output.writeUTF(server_json.toJSONString());
 								loop = false;
+
 							} else if (answer.compareTo("no") == 0) {
-								JSONObject server_json = getJson("reject_file", username + " rejected the file.",
-										fileSender, username);
+								JSONObject server_json = getJson("reject_file", fileName, fileSender, username);
 								server.sendPrivateMessage(server_json);
-								server_json = getJson("server_info", "You have declined the clients request", username,
+								server_json = getJson("server_info", "You have declined the client's request", username,
 										"server");
 								output.writeUTF(server_json.toJSONString());
 								loop = false;
+
 							} else {
 								JSONObject server_json = getJson("server_info",
-										"You need to input yes or no to the request: ", username, "server");
+										"You need to input yes or no to the request: ", username, "Server");
 								output.writeUTF(server_json.toJSONString());
 							}
 

@@ -110,7 +110,7 @@ public class ChatClient {
 
 		else if (message.substring(0, 3).compareTo("/s ") == 0) {
 			String sendToUser = getUser(message);
-			String fileName = message.substring(3 + sendToUser.length(), message.length());
+			String fileName = message.substring(3 + sendToUser.length() + 1, message.length());
 			json.put("REQUEST", "send_file");
 			json.put("TO", sendToUser);
 			json.put("FROM", username);
@@ -226,6 +226,8 @@ public class ChatClient {
 						connectionInfo.put("FROM", username);
 						connectionInfo.put("CONTENT", clientIP + ":" + clientPort);
 						output.writeUTF(connectionInfo.toJSONString());
+						System.out.println("Content: " + content);
+
 						sendBinaryFile(new File(content));
 
 					} else if (request.compareTo("reject_file") == 0) {
@@ -254,7 +256,7 @@ public class ChatClient {
 	private void sendBinaryFile(File file) {
 
 		if (!file.exists()) {
-			System.out.println("Content: " + file.getAbsolutePath());
+
 			System.out.println("The file you wish to send does not exist.");
 
 		} else {
