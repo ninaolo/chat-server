@@ -1,4 +1,3 @@
-import java.awt.FileDialog;
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -14,6 +13,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import javax.swing.JFileChooser;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -286,27 +287,36 @@ public class ChatClient {
 			System.out.println("Successfully connected to IP " + IP + ". Trying to download file...");
 			ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			File file = (File) input.readObject();
-			System.out.println("Successfully downloaded file: [" + file.getName() + "].");
 
 			// Opens a file dialog where you can choose a destination for the
 			// file
-			FileDialog fd = new FileDialog(fileFrame, "Choose a destination", FileDialog.LOAD);
-			fd.setDirectory(null);
-			fd.setFile(file.getName());
-			fd.setVisible(true);
+			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+			fileChooser.setDialogTitle("Choose a destination for the downloaded file");
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			fileChooser.setAcceptAllFileFilterUsed(false);
 
-			// Copies the file object to the chosen path
-			FileInputStream fileIn = null;
-			FileOutputStream fileOut = null;
-			fileIn = new FileInputStream(file);
-			fileOut = new FileOutputStream(fd.getDirectory() + fd.getFile());
-			int read;
-			while ((read = fileIn.read()) != -1) {
-				fileOut.write(read);
+			if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+				System.out.println("You chose to save the file in: " + fileChooser.getSelectedFile());
+
+				// Copies the file object to the chosen path
+				FileInputStream fileIn = null;
+				FileOutputStream fileOut = null;
+				fileIn = new FileInputStream(file);
+				fileOut = new FileOutputStream(fileChooser.getSelectedFile() + "/" + file.getName());
+				int read;
+				while ((read = fileIn.read()) != -1) {
+					fileOut.write(read);
+				}
+				fileOut.close();
+				fileIn.close();
+				socket.close();
+				System.out.println("Successfully downloaded file: [" + fileChooser.getSelectedFile() + "/"
+						+ file.getName() + "].");
+
+			} else {
+				System.out.println("You didn't select a directory to save the file in. The file did not download.");
 			}
-			fileOut.close();
-			fileIn.close();
-			socket.close();
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
