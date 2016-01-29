@@ -186,7 +186,6 @@ public class ChatClient {
 
 				// Wait for requests/messages from other clients or the server.
 				while (true) {
-
 					String message = serverInput.readUTF();
 
 					JSONObject json = (JSONObject) parser.parse(message);

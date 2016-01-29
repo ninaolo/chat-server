@@ -46,7 +46,7 @@ public class ServerThread extends Thread {
 			e.printStackTrace();
 		}
 
-		// Startar upp tråden genom att kalla på run()
+		server.sendWelcomeMsg(this);
 		start();
 	}
 
@@ -96,7 +96,6 @@ public class ServerThread extends Thread {
 				}
 
 				else if (request.compareTo("whisper") == 0) {
-					System.out.println("hej");
 					if (server.userExists(to)) {
 						server.sendPrivateMessage(json);
 					} else {

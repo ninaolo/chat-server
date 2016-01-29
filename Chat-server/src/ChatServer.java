@@ -55,8 +55,8 @@ public class ChatServer {
 		}
 	}
 
-	private void sendWelcomeMsg(ServerThread thread) {
-		String msg = "### Welcome to the chat room " + thread.username + "! ###\n";
+	public void sendWelcomeMsg(ServerThread thread) {
+		String msg = "\n### Welcome to the chat room " + thread.username + "! ###\n";
 		msg += "\nThere are currently " + threads.size()
 				+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.\n";
 		msg += "\n-- USERS IN CHAT ROOM --\n";
@@ -64,8 +64,8 @@ public class ChatServer {
 			msg += clientThread.username + "\n";
 		}
 		msg += "\n-- COMMANDS--\n";
-		msg += "Whisper to a user:\n\\w <username> <message>";
-		msg += "Send arbitrary file to a user:\n\\s <username> <path/to/file.txt>";
+		msg += "Whisper to a user:   \\w <username> <message>\n";
+		msg += "Send arbitrary file to a user:   \\s <username> <path/to/file.txt>";
 
 		JSONObject json = getJson("whisper", msg, thread.username, "");
 		try {
@@ -158,7 +158,7 @@ public class ChatServer {
 	private void clientAdded(ServerThread newThread) {
 		String message = newThread.username + " joined the chat! There are now " + (threads.size() + 1)
 				+ " users in the chat room.";
-		JSONObject server_json = getJson("send_to_all", message, "", "server");
+		JSONObject server_json = getJson("send_to_all", message, "", "Server");
 		sendMsgToAll(server_json);
 	}
 
