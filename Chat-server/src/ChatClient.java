@@ -40,7 +40,7 @@ public class ChatClient {
 
 		try {
 
-			this.clientIP = InetAddress.getLocalHost().toString();
+			this.clientIP = InetAddress.getLocalHost().getHostAddress();
 
 			// Start connection to chat server
 			System.out.println("Trying to connect...");
@@ -225,10 +225,8 @@ public class ChatClient {
 						connectionInfo.put("TO", from);
 						connectionInfo.put("FROM", username);
 						connectionInfo.put("CONTENT", clientIP + ":" + clientPort);
-						output.writeUTF(connectionInfo.toJSONString());
-						System.out.println("Content: " + content);
 
-						sendBinaryFile(new File(content));
+						sendBinaryFile(new File(content), connectionInfo);
 
 					} else if (request.compareTo("reject_file") == 0) {
 						System.out.println("### " + from + " rejected your request to send a file. ###");
@@ -253,16 +251,20 @@ public class ChatClient {
 	 * Sends an arbitrary binary file on the output stream for someone else to
 	 * fetch.
 	 */
-	private void sendBinaryFile(File file) {
+	private void sendBinaryFile(File file, JSONObject connectionInfo) {
 
 		if (!file.exists()) {
-
 			System.out.println("The file you wish to send does not exist.");
 
 		} else {
-
+			System.out.println("### Trying to send file...###");
 			try {
 				ServerSocket clientServerSocket = new ServerSocket(clientPort);
+
+				// Send connection info to client which shall receive the file
+				output.writeUTF(connectionInfo.toJSONString());
+
+				// Wait for client to start downloading the file
 				Socket otherClientSocket = clientServerSocket.accept();
 				ObjectOutputStream outStream = new ObjectOutputStream(otherClientSocket.getOutputStream());
 				outStream.writeObject(file);
@@ -278,6 +280,7 @@ public class ChatClient {
 	 * Opens a socket and attempts to receive a binary file from input stream.
 	 */
 	private void receiveBinaryFile(String IP, int port) {
+		System.out.println("### Trying to download file...###");
 		try {
 			Socket socket = new Socket(IP, port);
 			System.out.println("Successfully connected to IP " + IP + ". Trying to download file...");

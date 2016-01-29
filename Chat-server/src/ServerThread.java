@@ -102,6 +102,11 @@ public class ServerThread extends Thread {
 						JSONObject server_json = getJson("server_info", "That user does not exist", username, "server");
 						output.writeUTF(server_json.toJSONString());
 					}
+
+				} else if (request.compareTo("send_address") == 0) {
+					server.sendPrivateMessage(getJson((String) json.get("REQUEST"), (String) json.get("CONTENT"),
+							(String) json.get("TO"), (String) json.get("FROM")));
+
 				} else if (request.compareTo("send_file") == 0) {
 					server.sendPrivateMessage(getJson("receive_file", (String) json.get("CONTENT"),
 							(String) json.get("TO"), (String) json.get("FROM")));
