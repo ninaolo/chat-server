@@ -77,7 +77,8 @@ public class ChatServer {
 	}
 
 	/*
-	 * Sends a private message (whisper) by retrieving data from a json object.
+	 * Sends a private message by retrieving data from a json object. Used for
+	 * whispering and responding to file requests.
 	 */
 	public void sendPrivateMessage(JSONObject json) {
 		String user = (String) json.get("TO");
@@ -93,46 +94,17 @@ public class ChatServer {
 		}
 
 	}
-	
-	public void respond(JSONObject json) {
-		String user = (String) json.get("TO");
-		String server_json = json.toJSONString();
-		for (ServerThread clientThread : threads) {
-			try{
-				if(clientThread.getUsername().compareTo(user)==0){
-					clientThread.output.writeUTF(server_json);
-					}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 
-	}
-	
-	public JSONObject getJson(String request,String content,String to,String from){
+	/*
+	 * Transforms protocol data into a JSON object.
+	 */
+	public JSONObject getJson(String request, String content, String to, String from) {
 		JSONObject json = new JSONObject();
 		json.put("REQUEST", request);
 		json.put("CONTENT", content);
 		json.put("TO", to);
-		json.put("FROM",from);
+		json.put("FROM", from);
 		return json;
-	}
-	
-	public void fileSendRequest(JSONObject json) {
-		String user = (String) json.get("TO");
-		String from = (String) json.get("FROM");
-		JSONObject server_json = getJson("recive_file","Wants to send you a file",user,from);
-		String sendmessage = server_json.toJSONString();
-		for (ServerThread clientThread : threads) {
-			try{
-				if(clientThread.getUsername().compareTo(user)==0){
-					clientThread.output.writeUTF(sendmessage);
-					}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 	/*
@@ -162,7 +134,7 @@ public class ChatServer {
 		}
 		thread.interrupt();
 		threads.remove(thread);
-		JSONObject server_json = getJson("send_to_all","User " + tempName + " has left the chatroom","","server");
+		JSONObject server_json = getJson("send_to_all", "User " + tempName + " has left the chatroom", "", "server");
 		sendMsgToAll(server_json);
 	}
 
@@ -170,8 +142,9 @@ public class ChatServer {
 	 * Sends a message to all others when a new client connects to the chat.
 	 */
 	private void clientAdded(ServerThread newThread) {
-		String message = newThread.username + " joined the chat! There are now "+ (threads.size() + 1) + " users in the chat room.";
-		JSONObject server_json = getJson("send_to_all",message,"","server");
+		String message = newThread.username + " joined the chat! There are now " + (threads.size() + 1)
+				+ " users in the chat room.";
+		JSONObject server_json = getJson("send_to_all", message, "", "server");
 		sendMsgToAll(server_json);
 	}
 

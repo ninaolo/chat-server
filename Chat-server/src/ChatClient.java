@@ -14,7 +14,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -209,9 +208,9 @@ public class ChatClient {
 					else if (request.compareTo("server_info") == 0) {
 						System.out.println(content);
 					}
-					
-					else if (request.compareTo("recive_file")==0){
-						System.out.println("User "+from+" wants to send a file to you. yes/no");
+
+					else if (request.compareTo("receive_file") == 0) {
+						System.out.println("User " + from + " wants to send a file to you. yes/no");
 						output.writeUTF(json.toJSONString());
 					}
 
