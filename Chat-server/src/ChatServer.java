@@ -55,7 +55,7 @@ public class ChatServer {
 		}
 	}
 
-	public void sendWelcomeMsg(ServerThread thread) {
+	public synchronized void sendWelcomeMsg(ServerThread thread) {
 		String msg = "\n### Welcome to the chat room " + thread.username + "! ###\n";
 		msg += "\nThere are currently " + threads.size()
 				+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.\n";
@@ -63,9 +63,9 @@ public class ChatServer {
 		for (ServerThread clientThread : threads) {
 			msg += clientThread.username + "\n";
 		}
-		msg += "\n-- COMMANDS--\n";
-		msg += "Whisper to a user:   \\w <username> <message>\n";
-		msg += "Send arbitrary file to a user:   \\s <username> <path/to/file.txt>";
+		msg += "\n-- COMMANDS --\n";
+		msg += "Whisper to a user:   /w <username> <message>\n";
+		msg += "Send arbitrary file to a user:   /s <username> <path/to/file.txt>\n";
 
 		JSONObject json = getJson("whisper", msg, thread.username, "");
 		try {
@@ -79,7 +79,7 @@ public class ChatServer {
 	 * Sends a message to all clients by retrieving data from a json object
 	 * representing a request.
 	 */
-	public void sendMsgToAll(JSONObject json) {
+	public synchronized void sendMsgToAll(JSONObject json) {
 		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
 			try {
@@ -95,7 +95,7 @@ public class ChatServer {
 	 * Sends a private message by retrieving data from a json object. Used for
 	 * whispering and responding to file requests.
 	 */
-	public void sendPrivateMessage(JSONObject json) {
+	public synchronized void sendPrivateMessage(JSONObject json) {
 		String user = (String) json.get("TO");
 		String server_json = json.toJSONString();
 		for (ServerThread clientThread : threads) {
@@ -124,7 +124,7 @@ public class ChatServer {
 	/*
 	 * Checks if a user is connected to the chat.
 	 */
-	public boolean userExists(String userName) {
+	public synchronized boolean userExists(String userName) {
 		for (ServerThread clientThread : threads) {
 			if (clientThread.getUsername().compareTo(userName) == 0) {
 				return true;
@@ -136,7 +136,7 @@ public class ChatServer {
 	/*
 	 * Used from ServerThread.
 	 */
-	public void removeThread(ServerThread thread) {
+	public synchronized void removeThread(ServerThread thread) {
 		System.out.println("A user wants to leave the chat room. Processing...");
 		String tempName = thread.getUsername();
 		try {
