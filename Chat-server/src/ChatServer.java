@@ -109,14 +109,19 @@ public class ChatServer {
 
 	}
 	
+	public JSONObject getJson(String request,String content,String to,String from){
+		JSONObject json = new JSONObject();
+		json.put("REQUEST", request);
+		json.put("CONTENT", content);
+		json.put("TO", to);
+		json.put("FROM",from);
+		return json;
+	}
+	
 	public void fileSendRequest(JSONObject json) {
 		String user = (String) json.get("TO");
 		String from = (String) json.get("FROM");
-		JSONObject server_json = new JSONObject();
-		server_json.put("REQUEST", "recive_file");
-		server_json.put("CONTENT", "Wants to send you a file");
-		server_json.put("TO", user);
-		server_json.put("FROM",from);
+		JSONObject server_json = getJson("recive_file","Wants to send you a file",user,from);
 		String sendmessage = server_json.toJSONString();
 		for (ServerThread clientThread : threads) {
 			try{
@@ -157,11 +162,7 @@ public class ChatServer {
 		}
 		thread.interrupt();
 		threads.remove(thread);
-		JSONObject server_json = new JSONObject();
-		server_json.put("REQUEST", "send_to_all");
-		server_json.put("CONTENT", "User " + tempName + " has left the chatroom");
-		server_json.put("TO", "");
-		server_json.put("FROM", "server");
+		JSONObject server_json = getJson("send_to_all","User " + tempName + " has left the chatroom","","server");
 		sendMsgToAll(server_json);
 	}
 
@@ -169,11 +170,8 @@ public class ChatServer {
 	 * Sends a message to all others when a new client connects to the chat.
 	 */
 	private void clientAdded(ServerThread newThread) {
-		JSONObject server_json = new JSONObject();
-		server_json.put("REQUEST", "send_to_all");
-		server_json.put("CONTENT", newThread.username + " joined the chat! There are now "+ (threads.size() + 1) + " users in the chat room.");
-		server_json.put("TO", "");
-		server_json.put("FROM","server");
+		String message = newThread.username + " joined the chat! There are now "+ (threads.size() + 1) + " users in the chat room.";
+		JSONObject server_json = getJson("send_to_all",message,"","server");
 		sendMsgToAll(server_json);
 	}
 
