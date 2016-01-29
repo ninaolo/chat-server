@@ -72,6 +72,10 @@ public class ChatClient {
 
 				output.writeUTF(json.toJSONString());
 
+				if (((String) json.get("REQUEST")).compareTo("leave") == 0) {
+					System.exit(0);
+				}
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -90,7 +94,6 @@ public class ChatClient {
 
 		if (message.compareTo("leave") == 0) {
 			System.out.println("Goodbye " + username);
-			System.exit(0);
 			json.put("REQUEST", "leave");
 			json.put("TO", "");
 			json.put("FROM", username);
