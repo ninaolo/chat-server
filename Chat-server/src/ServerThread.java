@@ -103,7 +103,8 @@ public class ServerThread extends Thread {
 						output.writeUTF(server_json.toJSONString());
 					}
 				} else if (request.compareTo("send_file") == 0) {
-					server.sendPrivateMessage(getJson("receive_file", "Wants to send you a file", to, from));
+					server.sendPrivateMessage(
+							getJson("receive_file", "", (String) json.get("TO"), (String) json.get("FROM")));
 				}
 
 				else if (request.compareTo("receive_file") == 0) {

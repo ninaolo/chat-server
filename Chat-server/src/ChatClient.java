@@ -192,6 +192,8 @@ public class ChatClient {
 
 					JSONObject json = (JSONObject) parser.parse(message);
 
+					System.out.println(json.toJSONString());
+
 					String request = (String) json.get("REQUEST");
 					String to = (String) json.get("TO");
 					String from = (String) json.get("FROM");
@@ -210,7 +212,8 @@ public class ChatClient {
 					}
 
 					else if (request.compareTo("receive_file") == 0) {
-						System.out.println("User " + from + " wants to send a file to you. yes/no");
+						System.out.println(
+								"### User " + from + " wants to send a file to you. To answer, type yes/no. ###");
 						output.writeUTF(json.toJSONString());
 					}
 
@@ -251,6 +254,7 @@ public class ChatClient {
 	private void sendBinaryFile(File file) {
 
 		if (!file.exists()) {
+			System.out.println("Content: " + file.getAbsolutePath());
 			System.out.println("The file you wish to send does not exist.");
 
 		} else {
