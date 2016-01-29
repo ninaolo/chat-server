@@ -6,8 +6,6 @@ import java.util.Optional;
 
 import org.json.simple.JSONObject;
 
-// OBS: synchronized, hur löser vi detta så att man inte tar bort trådar samtidigt som man loopar igenom dem?
-
 /*
  * Represents a chat server to a multi-threaded chat which can accept multiple clients.
  */
@@ -49,15 +47,32 @@ public class ChatServer {
 			// Create a new thread for every client
 			ServerThread thread = new ServerThread(this, clientSocket);
 
-			thread.output
-					.writeUTF("Welcome to the chat " + thread.username + "! There are currently " + (threads.size() + 1)
-							+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.");
 			clientAdded(thread);
 
 			// Add the new chat user to a list
 			threads.add(thread);
+			sendWelcomeMsg(thread);
 		}
+	}
 
+	private void sendWelcomeMsg(ServerThread thread) {
+		String msg = "### Welcome to the chat room " + thread.username + "! ###\n";
+		msg += "\nThere are currently " + threads.size()
+				+ " users in the chat room. If you want to leave the chat room, simply type 'leave'.\n";
+		msg += "\n-- USERS IN CHAT ROOM --\n";
+		for (ServerThread clientThread : threads) {
+			msg += clientThread.username + "\n";
+		}
+		msg += "\n-- COMMANDS--\n";
+		msg += "Whisper to a user:\n\\w <username> <message>";
+		msg += "Send arbitrary file to a user:\n\\s <username> <path/to/file.txt>";
+
+		JSONObject json = getJson("whisper", msg, thread.username, "");
+		try {
+			thread.output.writeUTF(json.toJSONString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -92,7 +107,6 @@ public class ChatServer {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	/*

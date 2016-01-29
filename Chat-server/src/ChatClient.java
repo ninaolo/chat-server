@@ -191,8 +191,6 @@ public class ChatClient {
 
 					JSONObject json = (JSONObject) parser.parse(message);
 
-					System.out.println(json.toJSONString());
-
 					String request = (String) json.get("REQUEST");
 					String to = (String) json.get("TO");
 					String from = (String) json.get("FROM");
@@ -203,7 +201,11 @@ public class ChatClient {
 					}
 
 					else if (request.compareTo("whisper") == 0) {
-						System.out.println(from + " (whisper): " + content);
+						if (from.compareTo("") == 0) {
+							System.out.println(content);
+						} else {
+							System.out.println(from + " (whisper): " + content);
+						}
 					}
 
 					else if (request.compareTo("server_info") == 0) {

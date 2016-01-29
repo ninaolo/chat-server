@@ -96,6 +96,7 @@ public class ServerThread extends Thread {
 				}
 
 				else if (request.compareTo("whisper") == 0) {
+					System.out.println("hej");
 					if (server.userExists(to)) {
 						server.sendPrivateMessage(json);
 					} else {
