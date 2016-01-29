@@ -1,4 +1,3 @@
-import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,8 +12,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import javax.swing.JFileChooser;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,7 +30,6 @@ public class ChatClient {
 	JSONParser parser = new JSONParser();
 	int clientPort = 5555; // Port used for sending byte files
 	String clientIP;
-	Frame fileFrame = new Frame(); // Used for displaying file option
 
 	public ChatClient(String username, String serverIP, int port) {
 
@@ -43,13 +39,12 @@ public class ChatClient {
 
 			this.clientIP = InetAddress.getLocalHost().getHostAddress();
 
-			// Start connection to chat server
-			System.out.println("Trying to connect...");
+			System.out.println("### Trying to connect... ###");
 			clientSocket = new Socket(serverIP, port);
-			System.out.println("Successfully connected to port " + clientSocket.getPort() + " on host "
-					+ clientSocket.getLocalAddress() + ".");
+			System.out.println("### Successfully connected to chat server port " + clientSocket.getPort() + " on host "
+					+ clientSocket.getLocalAddress() + ". ###");
 
-			// get input and output streams
+			// Get input and output streams
 			serverInput = new DataInputStream(clientSocket.getInputStream());
 			output = new DataOutputStream(clientSocket.getOutputStream());
 			clientInput = new BufferedReader(new InputStreamReader(System.in));
@@ -57,7 +52,7 @@ public class ChatClient {
 			// Sends username on output so that ServerThread can save it
 			username = this.getValidUserName(username);
 
-			// Start a thread which listened for chat messages
+			// Start a thread which listens for chat messages
 			new Thread(new ChatListener()).start();
 
 		} catch (UnknownHostException e) {
@@ -155,6 +150,9 @@ public class ChatClient {
 		return user;
 	}
 
+	/*
+	 * Handles username input if a username is written which is not valid.
+	 */
 	private String getValidUserName(String user) {
 		String valid = "";
 		user = user.replaceAll("\\s+", "");
@@ -162,7 +160,7 @@ public class ChatClient {
 			output.writeUTF(user);
 			valid = serverInput.readUTF();
 			while (valid.compareTo("false") == 0) {
-				System.out.print("Username already taken..., please pick another: ");
+				System.out.print("### Username already taken, please pick another: ###");
 				user = clientInput.readLine();
 				user = user.replaceAll("\\s+", "");
 				output.writeUTF(user);
@@ -172,13 +170,13 @@ public class ChatClient {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return user;
 
+		return user;
 	}
 
 	/*
-	 * En privat klass som gör att vi kan ha en kontinuerlig tråd som kör och
-	 * väntar på att meddelanden ska komma från servern.
+	 * A private thread class which (when run() is invoked) waits for messages
+	 * from the server and takes care of handling different incoming requests.
 	 */
 	private class ChatListener extends Thread {
 
@@ -255,10 +253,10 @@ public class ChatClient {
 	private void sendBinaryFile(File file, JSONObject connectionInfo) {
 
 		if (!file.exists()) {
-			System.out.println("The file you wish to send does not exist.");
+			System.out.println("### The file you wish to send does not exist. ###");
 
 		} else {
-			System.out.println("### Trying to send file...###");
+			System.out.println("### Trying to send file... ###");
 			try {
 				ServerSocket clientServerSocket = new ServerSocket(clientPort);
 
@@ -284,39 +282,24 @@ public class ChatClient {
 		System.out.println("### Trying to download file...###");
 		try {
 			Socket socket = new Socket(IP, port);
-			System.out.println("Successfully connected to IP " + IP + ". Trying to download file...");
+			System.out.println("### Successfully connected to IP " + IP + ". Trying to download file... ###");
 			ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			File file = (File) input.readObject();
 
-			// Opens a file dialog where you can choose a destination for the
-			// file
-			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-			fileChooser.setDialogTitle("Choose a destination for the downloaded file");
-			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			fileChooser.setAcceptAllFileFilterUsed(false);
-
-			if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-				System.out.println("You chose to save the file in: " + fileChooser.getSelectedFile());
-
-				// Copies the file object to the chosen path
-				FileInputStream fileIn = null;
-				FileOutputStream fileOut = null;
-				fileIn = new FileInputStream(file);
-				fileOut = new FileOutputStream(fileChooser.getSelectedFile() + "/" + file.getName());
-				int read;
-				while ((read = fileIn.read()) != -1) {
-					fileOut.write(read);
-				}
-				fileOut.close();
-				fileIn.close();
-				socket.close();
-				System.out.println("Successfully downloaded file: [" + fileChooser.getSelectedFile() + "/"
-						+ file.getName() + "].");
-
-			} else {
-				System.out.println("You didn't select a directory to save the file in. The file did not download.");
+			// Copies the file object to the chosen path
+			FileInputStream fileIn = null;
+			FileOutputStream fileOut = null;
+			fileIn = new FileInputStream(file);
+			fileOut = new FileOutputStream(System.getProperty("user.home") + "/" + file.getName());
+			int read;
+			while ((read = fileIn.read()) != -1) {
+				fileOut.write(read);
 			}
+			fileOut.close();
+			fileIn.close();
+			socket.close();
+			System.out.println("### Successfully downloaded file to: [" + System.getProperty("user.home") + "/"
+					+ file.getName() + "]. ###");
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -328,8 +311,8 @@ public class ChatClient {
 	}
 
 	/*
-	 * 127.0.0.1 är den lokala datorn och args[0] är ett användarnamn som man
-	 * får välja
+	 * args[0] is a username and args[1] is the host address. The port 1337 is
+	 * hard coded for simplicity reasons.
 	 */
 	public static void main(String[] args) {
 		new ChatClient(args[0], args[1], 1337);
