@@ -2,8 +2,6 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -12,6 +10,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,37 +30,27 @@ public class ChatClient {
 	int clientPort = 5555; // Port used for sending byte files
 	String clientIP;
 
-	public ChatClient(String username, String serverIP, int port) {
+	public ChatClient(String username, String serverIP, int port) throws IOException {
 
 		this.username = username;
 
-		try {
+		this.clientIP = InetAddress.getLocalHost().getHostAddress();
 
-			this.clientIP = InetAddress.getLocalHost().getHostAddress();
+		System.out.println("### Trying to connect... ###");
+		clientSocket = new Socket(serverIP, port);
+		System.out.println("### Successfully connected to chat server port " + clientSocket.getPort() + " on host "
+				+ clientSocket.getLocalAddress() + ". ###");
 
-			System.out.println("### Trying to connect... ###");
-			clientSocket = new Socket(serverIP, port);
-			System.out.println("### Successfully connected to chat server port " + clientSocket.getPort() + " on host "
-					+ clientSocket.getLocalAddress() + ". ###");
+		// Get input and output streams
+		serverInput = new DataInputStream(clientSocket.getInputStream());
+		output = new DataOutputStream(clientSocket.getOutputStream());
+		clientInput = new BufferedReader(new InputStreamReader(System.in));
 
-			// Get input and output streams
-			serverInput = new DataInputStream(clientSocket.getInputStream());
-			output = new DataOutputStream(clientSocket.getOutputStream());
-			clientInput = new BufferedReader(new InputStreamReader(System.in));
+		// Sends username on output so that ServerThread can save it
+		username = this.getValidUserName(username);
 
-			// Sends username on output so that ServerThread can save it
-			username = this.getValidUserName(username);
-
-			// Start a thread which listens for chat messages
-			new Thread(new ChatListener()).start();
-
-		} catch (UnknownHostException e) {
-			System.out.println("Unknown host");
-			e.printStackTrace();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		// Start a thread which listens for chat messages
+		new Thread(new ChatListener()).start();
 
 		// Waits for the client to write messages in the chat
 		while (true) {
@@ -270,7 +259,14 @@ public class ChatClient {
 				// Wait for client to start downloading the file
 				Socket otherClientSocket = clientServerSocket.accept();
 				ObjectOutputStream outStream = new ObjectOutputStream(otherClientSocket.getOutputStream());
+				byte[] fileContent = Files.readAllBytes(file.toPath());
+
+				// This is for sending the file information (name, size etc.)
 				outStream.writeObject(file);
+
+				// This is for sending the file content
+				outStream.writeObject(fileContent);
+
 				clientServerSocket.close();
 				System.out.println("### Successfully sent file! ###");
 
@@ -287,24 +283,14 @@ public class ChatClient {
 		System.out.println("### Trying to download file...###");
 		try {
 			Socket socket = new Socket(IP, port);
-			System.out.println("### Successfully connected to IP " + IP + ". Trying to download file... ###");
+			System.out.println("### Successfully connected to IP " + IP + ". Downloading file... ###");
 			ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-			File file = (File) input.readObject();
-
-			// Copies the file object to the chosen path
-			FileInputStream fileIn = null;
-			FileOutputStream fileOut = null;
-			fileIn = new FileInputStream(file);
-			fileOut = new FileOutputStream(System.getProperty("user.home") + "/" + file.getName());
-			int read;
-			while ((read = fileIn.read()) != -1) {
-				fileOut.write(read);
-			}
-			fileOut.close();
-			fileIn.close();
+			File sentFile = (File) input.readObject();
+			byte[] fileContent = (byte[]) input.readObject();
+			File receivedFile = new File(System.getProperty("user.home") + "/" + sentFile.getName());
+			Files.write(receivedFile.toPath(), fileContent);
 			socket.close();
-			System.out.println("### Successfully downloaded file to: [" + System.getProperty("user.home") + "/"
-					+ file.getName() + "]. ###");
+			System.out.println("### Successfully downloaded file to: [" + receivedFile.getAbsolutePath() + "]. ###");
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -319,7 +305,7 @@ public class ChatClient {
 	 * args[0] is a username and args[1] is the host address. The port 1337 is
 	 * hard coded for simplicity reasons.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		new ChatClient(args[0], args[1], 1337);
 	}
 
