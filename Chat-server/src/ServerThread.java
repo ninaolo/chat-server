@@ -99,7 +99,8 @@ public class ServerThread extends Thread {
 					if (server.userExists(to)) {
 						server.sendPrivateMessage(json);
 					} else {
-						JSONObject server_json = getJson("server_info", "That user does not exist", username, "server");
+						JSONObject server_json = getJson("server_info", "### That user does not exist. ###", username,
+								"Server");
 						output.writeUTF(server_json.toJSONString());
 					}
 
@@ -108,8 +109,14 @@ public class ServerThread extends Thread {
 							(String) json.get("TO"), (String) json.get("FROM")));
 
 				} else if (request.compareTo("send_file") == 0) {
-					server.sendPrivateMessage(getJson("receive_file", (String) json.get("CONTENT"),
-							(String) json.get("TO"), (String) json.get("FROM")));
+					if (server.userExists(to)) {
+						server.sendPrivateMessage(getJson("receive_file", (String) json.get("CONTENT"),
+								(String) json.get("TO"), (String) json.get("FROM")));
+					} else {
+						JSONObject server_json = getJson("server_info", "### That user does not exist. ###", username,
+								"Server");
+						output.writeUTF(server_json.toJSONString());
+					}
 				}
 
 				else if (request.compareTo("receive_file") == 0) {

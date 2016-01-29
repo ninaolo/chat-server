@@ -272,6 +272,7 @@ public class ChatClient {
 				ObjectOutputStream outStream = new ObjectOutputStream(otherClientSocket.getOutputStream());
 				outStream.writeObject(file);
 				clientServerSocket.close();
+				System.out.println("### Successfully sent file! ###");
 
 			} catch (IOException e) {
 				e.printStackTrace();
