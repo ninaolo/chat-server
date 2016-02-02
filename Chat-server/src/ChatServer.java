@@ -22,6 +22,9 @@ public class ChatServer {
 		listen();
 	}
 
+	/*
+	 * Starts the server by creating a new ServerSocket.
+	 */
 	private void startServer() throws IOException {
 		System.out.println("Attempting to start server...");
 		serverSocket = new ServerSocket(port);
@@ -55,6 +58,9 @@ public class ChatServer {
 		}
 	}
 
+	/*
+	 * Sends a welcome message to the given ServerThread.
+	 */
 	public synchronized void sendWelcomeMsg(ServerThread thread) {
 		String msg = "\n### Welcome to the chat room " + thread.username + "! ###\n";
 		msg += "\nThere are currently " + threads.size()
@@ -134,7 +140,7 @@ public class ChatServer {
 	}
 
 	/*
-	 * Used from ServerThread.
+	 * Remoces a given thread from this server's list of active clients.
 	 */
 	public synchronized void removeThread(ServerThread thread) {
 		System.out.println("A user wants to leave the chat room. Processing...");
@@ -186,7 +192,7 @@ public class ChatServer {
 		}
 	}
 
-	// Main: create a new server
+	// Create a new server
 	public static void main(String[] args) throws IOException {
 		new ChatServer();
 	}
