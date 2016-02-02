@@ -100,13 +100,18 @@ public class ChatClient {
 		else if (message.substring(0, 3).compareTo("/s ") == 0) {
 			String sendToUser = getUser(message);
 			if (message.length() <= 3 + sendToUser.length() + 1) {
-				System.out.println("You have to specify a file name for the /s command");
+				System.out.println("You have to specify a file name for the /s command.");
 			} else {
 				String fileName = message.substring(3 + sendToUser.length() + 1, message.length());
-				json.put("REQUEST", "send_file");
-				json.put("TO", sendToUser);
-				json.put("FROM", username);
-				json.put("CONTENT", fileName);
+				File file = new File(fileName);
+				if (!file.exists()) {
+					System.out.println("The file you wish to send does not exist.");
+				} else {
+					json.put("REQUEST", "send_file");
+					json.put("TO", sendToUser);
+					json.put("FROM", username);
+					json.put("CONTENT", fileName);
+				}
 			}
 		}
 
