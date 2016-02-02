@@ -30,8 +30,7 @@ public class ServerThread extends Thread {
 			input = new DataInputStream(clientSocket.getInputStream());
 			output = new DataOutputStream(clientSocket.getOutputStream());
 
-			// Vi har gjort så att ChatClient alltid skickar sitt username när
-			// den connectar
+			// ChatClient sends its username when it connetcs
 			username = input.readUTF();
 
 			// If the username already exists, it sends back false to the
@@ -87,7 +86,7 @@ public class ServerThread extends Thread {
 				from = (String) json.get("from");
 
 				if (request.compareTo("leave") == 0) {
-					server.removeThread(this);
+					// Will end up at the finally
 					break;
 				}
 
@@ -170,7 +169,6 @@ public class ServerThread extends Thread {
 			ioe.printStackTrace();
 
 		} catch (org.json.simple.parser.ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			// Om inte detta görs kan det bli massa döda trådar kvar
