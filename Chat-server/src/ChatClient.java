@@ -58,13 +58,14 @@ public class ChatClient {
 				String message = clientInput.readLine() + "";
 
 				JSONObject json = parseMessage(message);
+				if (!json.isEmpty()) {
 
-				output.writeUTF(json.toJSONString());
+					output.writeUTF(json.toJSONString());
 
-				if (((String) json.get("REQUEST")).compareTo("leave") == 0) {
-					System.exit(0);
+					if (((String) json.get("REQUEST")).compareTo("leave") == 0) {
+						System.exit(0);
+					}
 				}
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -98,11 +99,15 @@ public class ChatClient {
 
 		else if (message.substring(0, 3).compareTo("/s ") == 0) {
 			String sendToUser = getUser(message);
-			String fileName = message.substring(3 + sendToUser.length() + 1, message.length());
-			json.put("REQUEST", "send_file");
-			json.put("TO", sendToUser);
-			json.put("FROM", username);
-			json.put("CONTENT", fileName);
+			if (message.length() <= 3 + sendToUser.length() + 1) {
+				System.out.println("You have to specify a file name for the /s command");
+			} else {
+				String fileName = message.substring(3 + sendToUser.length() + 1, message.length());
+				json.put("REQUEST", "send_file");
+				json.put("TO", sendToUser);
+				json.put("FROM", username);
+				json.put("CONTENT", fileName);
+			}
 		}
 
 		else if (message.substring(0, 3).compareTo("/w ") == 0) {
