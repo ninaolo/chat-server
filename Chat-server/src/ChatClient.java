@@ -100,7 +100,7 @@ public class ChatClient {
 		else if (message.substring(0, 3).compareTo("/s ") == 0) {
 			String sendToUser = getUser(message);
 			if (message.length() <= 3 + sendToUser.length() + 1) {
-				System.out.println("You have to specify a file name for the /s command.");
+				System.out.println("The /s command has to be on this format: /s <username> <path/to/file.txt>");
 			} else {
 				String fileName = message.substring(3 + sendToUser.length() + 1, message.length());
 				File file = new File(fileName);
