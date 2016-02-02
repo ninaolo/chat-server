@@ -34,8 +34,7 @@ public class ServerThread extends Thread {
 			username = input.readUTF();
 
 			// If the username already exists, it sends back false to the
-			// chatclient
-			// It exits the loop when the user enters a valid username
+			// client. It exits the loop when the user enters a valid username
 			while (server.userExists(username)) {
 				output.writeUTF("false");
 				username = input.readUTF();
@@ -53,6 +52,9 @@ public class ServerThread extends Thread {
 		return username;
 	}
 
+	/*
+	 * Takes protocol parameters and puts them into a JSON object.
+	 */
 	public JSONObject getJson(String request, String content, String to, String from) {
 		JSONObject json = new JSONObject();
 		json.put("REQUEST", request);
@@ -170,8 +172,9 @@ public class ServerThread extends Thread {
 
 		} catch (org.json.simple.parser.ParseException e) {
 			e.printStackTrace();
+
 		} finally {
-			// Om inte detta görs kan det bli massa döda trådar kvar
+			// 'leave' command ends up here or other things which break the loop
 			server.removeThread(this);
 		}
 
