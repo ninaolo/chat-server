@@ -135,7 +135,9 @@ public class ChatClient {
 	}
 
 	/*
-	 * Parses the message to retrieve the username within it.
+	 * Parses the message to retrieve the username within it. A message has to
+	 * have at least three characters for a command ("/s ","/w ") that uses a
+	 * username after.
 	 */
 	private String getUser(String message) {
 		String user = "";
@@ -153,7 +155,11 @@ public class ChatClient {
 	}
 
 	/*
-	 * Handles username input if a username is written which is not valid.
+	 * Handles username input if a username is written which is not valid. This
+	 * is communicated back and forth with the server. The server checks if the
+	 * user exists and sends back a "true" if the username is valid and a
+	 * "false" if the username exists. This is done before the serverthreads run
+	 * method is invoked.
 	 */
 	private String getValidUserName(String user) {
 		String valid = "";
