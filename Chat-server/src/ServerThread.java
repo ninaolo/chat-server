@@ -30,7 +30,8 @@ public class ServerThread extends Thread {
 			input = new DataInputStream(clientSocket.getInputStream());
 			output = new DataOutputStream(clientSocket.getOutputStream());
 
-			// ChatClient always sends its username when it connects
+			// Vi har gjort så att ChatClient alltid skickar sitt username när
+			// den connectar
 			username = input.readUTF();
 
 			// If the username already exists, it sends back false to the
@@ -109,6 +110,9 @@ public class ServerThread extends Thread {
 
 				} else if (request.compareTo("send_file") == 0) {
 					if (server.userExists(to)) {
+						JSONObject server_json = getJson("server_info", "### Waiting for user to accept file ###",
+								username, "Server");
+						output.writeUTF(server_json.toJSONString());
 						server.sendPrivateMessage(getJson("receive_file", (String) json.get("CONTENT"),
 								(String) json.get("TO"), (String) json.get("FROM")));
 					} else {
@@ -166,9 +170,10 @@ public class ServerThread extends Thread {
 			ioe.printStackTrace();
 
 		} catch (org.json.simple.parser.ParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			// If this isn't done several dead threads can be left
+			// Om inte detta görs kan det bli massa döda trådar kvar
 			server.removeThread(this);
 		}
 
