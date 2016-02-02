@@ -45,5 +45,12 @@ they belong to?
   * **Size:** TCP header size is big (20 bytes) and UDP is small (8 bytes).
   * **Usage:** Because of the above, TCP should be used in cases where high reliability is required and transmission time is less important (for example email). UDP should on the other hand be used when you need something lighweight which transports data efficiently, like in games or when streaming videos (and it isn't the end of the world if one bit here and there is in the wrong order or gets lost on the way...)
 
-
+7. In this implementation, if A wants to send a file to B, A creates a ServerSocket and B connects to it for downloading. It could also be one like this:
+  ```
+  A: Socket
+  B: ServerSocket
+  
+  A —> B
+  ```
+  This would be a security flaw, since A could connect to B and start transferring bytes without B having a say in this. A could then transfer a virus file, for example.
 
