@@ -4,7 +4,7 @@ This is a repository for a lab assignment in the course DD2390 (Internet Program
 
 ## How to run the chat server
 1. Open three terminal windows
-2. Go to `labs-DD2390/Chat-server/bin`
+2. Compile to java .class files
 3. In the first terminal window, type `java ChatServer`
 4. In the second and third window, type `java ChatClient` followed by a username of your choice
 5. Done! Whenever you type messages from one of the users, the others will see it together with the sender's username
